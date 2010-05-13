@@ -39,7 +39,7 @@ static String osArch() {
   return osarch;
 }
 
-static String extractResource(URL url) {
+public static String extractResource(URL url) {
   try {
     // Extract resource file from Jar.
     JarURLConnection jar = (JarURLConnection) url.openConnection();
