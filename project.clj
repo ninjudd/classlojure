@@ -1,4 +1,4 @@
-(defproject classlojure "0.0.4-SNAPSHOT"
+(defproject classlojure "0.1.0-SNAPSHOT"
   :description "Advanced classloading for clojure."
   :dependencies [[clojure "1.2.0-master-SNAPSHOT"]]
   :source-path "src/clj"
