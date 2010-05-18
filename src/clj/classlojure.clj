@@ -10,6 +10,8 @@
         (finally
          (.setContextClassLoader (Thread/currentThread) cl#))))))
 
-(defn extract-resource [name]
-  (let [url #^java.net.URL (.findResource (NativeClassLoader.) name)]
-    (NativeClassLoader/extractResource url)))
+(defn extract-resource
+  ([name] (extract-resource name nil))
+  ([name outdir]
+     (let [outdir (when outdir (java.io.File. outdir))]
+       (.extractResource (NativeClassLoader.) #^String name #^File outdir))))

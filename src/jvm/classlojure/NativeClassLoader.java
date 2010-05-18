@@ -23,6 +23,56 @@ public NativeClassLoader(URL[] urls, ClassLoader parent) {
   super(urls, parent);
 }
 
+void writeStream(InputStream in, File outfile) {
+  outfile.getParentFile().mkdirs();
+
+  try {
+    OutputStream out = new FileOutputStream(outfile);
+
+    byte[] buffer = new byte[1024];
+    int len;
+    while ((len = in.read(buffer))>0) out.write(buffer, 0, len);
+    out.close();
+    in.close();
+  } catch (java.io.IOException e) {
+  }
+}
+
+public String extractResource(String name) {
+  return extractResource(name, null);
+}
+
+public String extractResource(String name, File outdir) {
+  File outfile;
+  InputStream in;
+  URL url = findResource(name);
+  if (url == null) return null;
+
+  try {
+    URLConnection c = url.openConnection();
+    if (c instanceof JarURLConnection) {
+      // Extract resource file from Jar.
+      JarURLConnection jar = (JarURLConnection) c;
+      File jarfile = new File(jar.getJarFile().getName());
+
+      if (outdir == null) outdir = new File(System.getProperty("java.io.tmpdir"), jarfile.getName());
+      outfile = new File(outdir, jar.getJarEntry().getName());
+      in = jar.getInputStream();
+    } else {
+      String file = url.getFile();
+      if (outdir == null) return file;
+
+      outfile = new File(outdir, name);
+      in = new FileInputStream(file);
+    }
+  } catch (java.io.IOException e) {
+    return null;
+  }
+
+  writeStream(in, outfile);
+  return outfile.getPath();
+}
+
 static String osName() {
   String osname = System.getProperty("os.name");
   if (osname.startsWith("Linux"))    return "linux";
@@ -39,41 +89,11 @@ static String osArch() {
   return osarch;
 }
 
-public static String extractResource(URL url) {
-  try {
-    // Extract resource file from Jar.
-    JarURLConnection jar = (JarURLConnection) url.openConnection();
-
-    File jarfile = new File(jar.getJarFile().getName());
-    File tmpdir  = new File(System.getProperty("java.io.tmpdir"), jarfile.getName());
-    File outfile = new File(tmpdir, jar.getJarEntry().getName());
-    outfile.getParentFile().mkdirs();
-    InputStream  in  = jar.getInputStream();
-    OutputStream out = new FileOutputStream(outfile);
-
-    byte[] buffer = new byte[1024];
-    int len;
-    while ((len = in.read(buffer))>0) out.write(buffer, 0, len);
-    out.close();
-    in.close();
-
-    return outfile.getPath();
-  } catch (ClassCastException e) {
-    return url.getFile();
-  } catch (java.io.IOException e) {
-    return null;
-  }
-}
-
 protected String findLibrary(String libname) {
   String lib = System.mapLibraryName(libname);
-  URL url = findResource(lib);
-  if (url == null) {
-    url = findResource("native/" + osName() + "/" + osArch() + "/" + lib);
-    if (url == null) return null;
-  }
-
-  return extractResource(url);
+  String libfile = extractResource(lib);
+  if (libfile == null) libfile = extractResource("native/" + osName() + "/" + osArch() + "/" + lib);
+  return libfile;
 }
 
 protected synchronized Class<?> loadClass(String name, boolean resolve)
