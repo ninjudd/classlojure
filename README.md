@@ -1,4 +1,6 @@
-NOTE: This is broken with the current version of clojure because of a bug that makes
+#NOTE:#
+
+This is broken with the current version of clojure because of a bug that makes
 `*use-context-classloader*` not work with `import`. Here is the
 [thread](http://groups.google.com/group/clojure-dev/browse_thread/thread/f61b550abf7f9c52/da25ba7e31b9431c?q=)
 discussing it.
