@@ -4,7 +4,7 @@
 (def ext-classloader
   (.getParent (.getClassLoader clojure.lang.RT)))
 
-(defn make [& urls]
+(defn classlojure [& urls]
   (URLClassLoader.
    (into-array URL (map #(URL. %) urls))
    ext-classloader))
