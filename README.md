@@ -1,23 +1,15 @@
-#NOTE:#
+classlojure lets you easily create a classloader with an alternate classpath and evaluate
+clojure forms in it. This classloader can even use a different version of clojure than
+your primary classloader.
 
-This is broken with the current version of clojure because of a bug that makes
-`*use-context-classloader*` not work with `import`. Here is the
-[thread](http://groups.google.com/group/clojure-dev/browse_thread/thread/f61b550abf7f9c52/da25ba7e31b9431c?q=)
-discussing it.
+## Usage
 
+    (require 'classlojure)
 
-## Native Libraries in Jars
+    (def clojure-13 (classlojure/make "file:clojure-1.3.0-alpha2-SNAPSHOT.jar"))
 
-The goal of this unfortunately named package is to allow you to use jars that contain
-native libraries just like regular jars. No need to run 'lein native-deps', no need to set
-LD_LIBRARY_PATH. As long as the Jar contains native libraries like this:
+    (classlojure/eval-in clojure-13 '*clojure-version)
+    ;; {:interim true, :major 1, :minor 3, :incremental 0, :qualifier "alpha2"}
 
-    native/{osname}/{osarch}/libawesome.{jniext}
-
-and requires the library like this:
-
-    System.loadLibrary("awesome");
-
-then you can import the library in Clojure like this:
-
-    (import-native 'com.awesome.Awesome)
+    (eval '*clojure-version*)
+    ;; {:major 1, :minor 2, :incremental 0, :qualifier ""}
