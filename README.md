@@ -8,7 +8,7 @@ your primary classloader.
 
     (def clojure-13 (classlojure "file:clojure-1.3.0-alpha2-SNAPSHOT.jar"))
 
-    (eval-in clojure-13 '*clojure-version)
+    (eval-in clojure-13 '*clojure-version*)
     ;; {:interim true, :major 1, :minor 3, :incremental 0, :qualifier "alpha2"}
 
     (eval '*clojure-version*)
