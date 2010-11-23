@@ -5,9 +5,12 @@
   (.getParent (.getClassLoader clojure.lang.RT)))
 
 (defn classlojure [& urls]
-  (URLClassLoader.
-   (into-array URL (map #(URL. %) (flatten urls)))
-   ext-classloader))
+  (let [cl (URLClassLoader.
+            (into-array URL (map #(URL. %) (flatten urls)))
+            ext-classloader)]
+    (try (.loadClass cl "clojure.lang.RT")
+         cl
+         (catch ClassNotFoundException e))))
 
 (defmacro with-classloader [cl & body]
   `(binding [*use-context-classloader* true]
