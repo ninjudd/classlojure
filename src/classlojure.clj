@@ -47,14 +47,17 @@
    is assumed to be a function and it is applied to the list of objects. This lets you pass objects
    between classloaders."
   [cl form & objects]
-  (read-string
-   (with-classloader cl
-     (let [string (if (seq objects)
-                    (format "(fn [args] (apply %s args))" (pr-str form))
-                    (pr-str form))
-           form   (invoke-in cl clojure.lang.RT/readString [String] string)
-           result (invoke-in cl clojure.lang.Compiler/eval [Object] form)
-           result (if (seq objects)
-                    (.invoke result objects)
-                    result)]
-       (invoke-in cl clojure.lang.RT/printString [Object] result)))))
+  (let [result-string
+        (with-classloader cl
+          (let [string (if (seq objects)
+                         (format "(fn [args] (apply %s args))" (pr-str form))
+                         (pr-str form))
+                form   (invoke-in cl clojure.lang.RT/readString [String] string)
+                result (invoke-in cl clojure.lang.Compiler/eval [Object] form)
+                result (if (seq objects)
+                         (.invoke result objects)
+                         result)]
+            (invoke-in cl clojure.lang.RT/printString [Object] result)))]
+    (try (read-string result-string)
+         (catch RuntimeException e
+           result-string))))
