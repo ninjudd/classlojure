@@ -4,19 +4,20 @@
 (def ext-classloader
   (.getParent (.getClassLoader clojure.lang.RT)))
 
+(defn- url-classloader [urls ext]
+  (URLClassLoader.
+   (into-array URL (map #(URL. %) (flatten urls)))
+   ext))
+
 (defn wrap-ext-classloader [& urls]
   (alter-var-root #'ext-classloader
-                  (fn [ext] ;; only permit wrapping once
-                    (if (= URLClassLoader (class ext))
-                      ext
-                      (URLClassLoader.
-                       (into-array URL (map #(URL. %) (flatten urls)))
-                       ext)))))
+    (fn [ext] ;; only permit wrapping once
+      (if (= URLClassLoader (class ext))
+        ext
+        (url-classloader urls ext)))))
 
 (defn classlojure [& urls]
-  (let [cl (URLClassLoader.
-            (into-array URL (map #(URL. %) (flatten urls)))
-            ext-classloader)]
+  (let [cl (url-classloader urls ext-classloader)]
     (try (.loadClass cl "clojure.lang.RT")
          cl
          (catch ClassNotFoundException e))))
