@@ -16,6 +16,13 @@
         ext
         (url-classloader urls ext)))))
 
+(defn get-classpath [cl]
+  (for [url (.getURLs cl)]
+    (let [path (.getPath url)]
+      (if (.endsWith path "/")
+        (.substring path 0 (- (count path) 1))
+        path))))
+
 (defn classlojure [& urls]
   (let [cl (url-classloader urls ext-classloader)]
     (try (.loadClass cl "clojure.lang.RT")
