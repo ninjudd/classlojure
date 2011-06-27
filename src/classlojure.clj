@@ -1,8 +1,12 @@
 (ns classlojure
+  (:use [useful :only [invoke-private]])
   (:import [java.net URL URLClassLoader]))
 
+(def base-classloader
+  (.getClassLoader clojure.lang.RT))
+
 (def ext-classloader
-  (.getParent (.getClassLoader clojure.lang.RT)))
+  (.getParent base-classloader))
 
 (defn- url-classloader [urls ext]
   (URLClassLoader.
@@ -36,6 +40,10 @@
             ~@body
             (finally
              (.setContextClassLoader (Thread/currentThread) cl#))))))
+
+(defn append-classpath! [cl & urls]
+  (doseq [url urls]
+    (invoke-private cl "addURL" (URL. url))))
 
 (defn invoke-in* [cl class-name method & [signature & params]]
   (let [class     (.loadClass cl class-name)
