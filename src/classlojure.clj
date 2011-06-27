@@ -1,5 +1,5 @@
 (ns classlojure
-  (:use [useful :only [invoke-private]])
+  (:use [useful.java :only [invoke-private]])
   (:import [java.net URL URLClassLoader]))
 
 (def base-classloader

@@ -1,4 +1,4 @@
-(defproject classlojure "0.5.1"
+(defproject classlojure "0.5.2"
   :description "Advanced classloading for clojure."
   :dependencies [[clojure "1.2.0"]
-                 [clojure-useful "0.3.8"]])
+                 [useful "0.4.0"]])
