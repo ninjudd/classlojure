@@ -29,9 +29,8 @@
 
 (defn classlojure [& urls]
   (let [cl (url-classloader urls ext-classloader)]
-    (try (.loadClass cl "clojure.lang.RT")
-         cl
-         (catch ClassNotFoundException e))))
+    (.loadClass cl "clojure.lang.RT")
+    cl))
 
 (defmacro with-classloader [cl & body]
   `(binding [*use-context-classloader* true]
