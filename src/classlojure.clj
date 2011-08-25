@@ -41,7 +41,7 @@
              (.setContextClassLoader (Thread/currentThread) cl#))))))
 
 (defn append-classpath! [cl & urls]
-  (let [existing? (set (map (memfn getPath) (.getURLS cl)))]
+  (let [existing? (set (map (memfn getPath) (.getURLs cl)))]
     (doseq [url urls]
       (when-not (existing? url)
         (invoke-private cl "addURL" (URL. url))))))
