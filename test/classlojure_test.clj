@@ -31,4 +31,11 @@
 (deftest eval-with-direct-forms
   (let [cl (classlojure "file:clojure-1.3.0-beta1.jar")]
     (is (= [(.hashCode System/out) (.hashCode System/err)]
-           (eval-in cl '(fn [a b] [(.hashCode a) (.hashCode b)]) System/out System/err)))))
+           (eval-in cl '(fn [a b] [(.hashCode a) (.hashCode b)])
+                    System/out System/err)))))
+
+(deftest eval-an-evaled-function
+  (let [cl (classlojure "file:clojure-1.3.0-beta1.jar")]
+    (is (= [(.hashCode System/out) (.hashCode System/err)]
+           (eval-in cl '(eval '(fn [a b] [(.hashCode a) (.hashCode b)]))
+                    System/out System/err)))))
