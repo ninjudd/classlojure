@@ -59,10 +59,11 @@
         method (name class-method)]
     `(invoke-in* ~cl ~class ~method ~@args)))
 
-(defn eval-in* [cl form]
+(defn eval-in* [cl string]
   (with-classloader cl
-    (let [form (invoke-in cl clojure.lang.RT/readString [String] (pr-str form))]
-      (invoke-in cl clojure.lang.Compiler/eval [Object] form))))
+    (->> string
+         (invoke-in cl clojure.lang.RT/readString [String])
+         (invoke-in cl clojure.lang.Compiler/eval [Object]))))
 
 (defn eval-in
   "Eval the given form in a separate classloader. If objects are passed after form, then the form
@@ -70,9 +71,9 @@
    between classloaders."
   [cl form & objects]
   (let [result (if (seq objects)
-                 (-> (eval-in* cl `(fn [~'args] (apply ~form ~'args)))
+                 (-> (eval-in* cl (format "(fn [args] (apply %s args))" (pr-str form)))
                      (.invoke objects))
-                 (eval-in* cl form))
+                 (eval-in* cl (pr-str form)))
         string (invoke-in cl clojure.lang.RT/printString [Object] result)]
     (try (read-string string)
          (catch RuntimeException e
