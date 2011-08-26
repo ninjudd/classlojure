@@ -65,6 +65,9 @@
          (invoke-in cl clojure.lang.RT/readString [String])
          (invoke-in cl clojure.lang.Compiler/eval [Object]))))
 
+(defn core-java-class? [object]
+  (not (and (class object) (.getClassLoader (class object)))))
+
 (defn eval-in
   "Eval the given form in a separate classloader. If objects are passed after form, then the form
    is assumed to be a function and it is applied to the list of objects. This lets you pass objects
@@ -73,8 +76,10 @@
   (let [result (if (seq objects)
                  (-> (eval-in* cl (format "(fn [args] (apply %s args))" (pr-str form)))
                      (.invoke objects))
-                 (eval-in* cl (pr-str form)))
-        string (invoke-in cl clojure.lang.RT/printString [Object] result)]
-    (try (read-string string)
-         (catch RuntimeException e
-           string))))
+                 (eval-in* cl (pr-str form)))]
+    (if (core-java-class? result)
+      result
+      (let [string (invoke-in cl clojure.lang.RT/printString [Object] result)]
+        (try (read-string string)
+             (catch RuntimeException e
+               string))))))
