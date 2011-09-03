@@ -59,8 +59,10 @@
         method (name class-method)]
     `(invoke-in* ~cl ~class ~method ~@args)))
 
-(defn core-java-class? [object]
-  (not (and (class object) (.getClassLoader (class object)))))
+(defn printable? [object]
+  (or (nil? object)
+      (and (class object)
+           (.getClassLoader (class object)))))
 
 (defn eval-in
   "Eval the given form in a separate classloader. If objects are passed after form, then the form
@@ -76,7 +78,7 @@
                      (-> (print-read-eval `(fn [~'args] (apply ~form ~'args)))
                          (.invoke objects))
                      (print-read-eval form))]
-        (if (core-java-class? result)
+        (if-not (printable? result)
           result
           (let [string (invoke-in cl clojure.lang.RT/printString [Object] result)]
             (try (read-string string)
