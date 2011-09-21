@@ -1,5 +1,5 @@
 (ns classlojure-test
-  (:use clojure.test classlojure))
+  (:use clojure.test classlojure.core))
 
 (deftest separate-classloader
   (let [cl (classlojure "file:clojure-1.3.0-beta1.jar")]

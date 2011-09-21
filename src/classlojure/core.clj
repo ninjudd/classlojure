@@ -1,4 +1,4 @@
-(ns classlojure
+(ns classlojure.core
   (:use [useful.java :only [invoke-private]])
   (:import [java.net URL URLClassLoader]))
 
