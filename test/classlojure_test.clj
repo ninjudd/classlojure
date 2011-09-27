@@ -1,7 +1,21 @@
 (ns classlojure-test
-  (:use clojure.test classlojure.core))
+  (:use clojure.test classlojure.core
+        [clojure.java.io :only [copy]]))
 
-(def clj-13 "file:clojure-1.3.0.jar")
+(def filepath "test/clojure-1.3.0.jar")
+(def clj-13 (str "file:" filepath))
+
+(defn with-clojure-jar [f]
+  (let [file (java.io.File. filepath)]
+    (when-not (.exists file)
+      (.createNewFile file)
+      (let [out (java.io.FileOutputStream. file)
+            url "http://search.maven.org/remotecontent?filepath=org/clojure/clojure/1.3.0/clojure-1.3.0.jar" ;; horrible url, can't find canonical one. someone fix?
+            ]
+        (copy url out))))
+  (f))
+
+(use-fixtures :once with-clojure-jar)
 
 (deftest separate-classloader
   (let [cl (classlojure clj-13)]
