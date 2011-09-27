@@ -1,6 +1,6 @@
 (ns classlojure-test
   (:use clojure.test classlojure.core
-        [clojure.java.io :only [copy]]))
+        [clojure.java.io :only [copy input-stream]]))
 
 (def filepath "test/clojure-1.3.0.jar")
 (def clj-13 (str "file:" filepath))
@@ -10,9 +10,9 @@
     (when-not (.exists file)
       (.createNewFile file)
       (let [out (java.io.FileOutputStream. file)
-            url "http://search.maven.org/remotecontent?filepath=org/clojure/clojure/1.3.0/clojure-1.3.0.jar" ;; horrible url, can't find canonical one. someone fix?
+            in (input-stream "http://repo1.maven.org/maven2/org/clojure/clojure/1.3.0/clojure-1.3.0.jar")
             ]
-        (copy url out))))
+        (copy in out))))
   (f))
 
 (use-fixtures :once with-clojure-jar)
