@@ -6,7 +6,7 @@
   (.getClassLoader clojure.lang.RT))
 
 (def ext-classloader
-  (.getParent base-classloader))
+  (.getParent ^ClassLoader base-classloader))
 
 (defn- url-classloader [urls ext]
   (URLClassLoader.
@@ -20,15 +20,15 @@
         ext
         (url-classloader urls ext)))))
 
-(defn get-classpath [cl]
-  (for [url (.getURLs cl)]
-    (let [path (.getPath url)]
+(defn get-classpath [^URLClassLoader cl]
+  (for [^URL url (.getURLs cl)]
+    (let [^String path (.getPath url)]
       (if (.endsWith path "/")
         (.substring path 0 (- (count path) 1))
         path))))
 
 (defn classlojure [& urls]
-  (let [cl (url-classloader urls ext-classloader)]
+  (let [^URLClassLoader cl (url-classloader urls ext-classloader)]
     (.loadClass cl "clojure.lang.RT")
     cl))
 
@@ -40,13 +40,13 @@
             (finally
              (.setContextClassLoader (Thread/currentThread) cl#))))))
 
-(defn append-classpath! [cl & urls]
-  (let [existing? (set (map (memfn getPath) (.getURLs cl)))]
+(defn append-classpath! [^URLClassLoader cl & urls]
+  (let [existing? (set (map #(.getPath ^URL %) (.getURLs cl)))]
     (doseq [url urls]
       (when-not (existing? url)
         (invoke-private cl "addURL" (URL. url))))))
 
-(defn invoke-in* [cl class-name method & [signature & params]]
+(defn invoke-in* [^ClassLoader cl class-name method & [signature & params]]
   (let [class     (.loadClass cl class-name)
         signature (into-array Class (or signature []))
         method    (.getDeclaredMethod class method signature)]
