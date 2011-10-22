@@ -74,10 +74,13 @@
                                (invoke-in cl clojure.lang.RT/readString [String])
                                (invoke-in cl clojure.lang.Compiler/eval [Object])))]
     (with-classloader cl
-      (let [result (if (seq objects)
-                     (-> (print-read-eval `(fn [~'args] (apply ~form ~'args)))
-                         (.invoke objects))
-                     (print-read-eval form))]
+      (let [result-or-fn (print-read-eval form)
+            result (if (seq objects)
+                     (-> (class result-or-fn)
+                         (.getMethod "invoke"
+                                     (into-array (repeat (count objects) Object)))
+                         (.invoke result-or-fn (to-array objects)))
+                     result-or-fn)]
         (if-not (printable? result)
           result
           (let [string (invoke-in cl clojure.lang.RT/printString [Object] result)]
