@@ -1,5 +1,6 @@
 (ns classlojure.core
-  (:use [useful.java :only [invoke-private]])
+  (:use [useful.java :only [invoke-private]]
+        [clojure.java.io :only [as-url]])
   (:import [java.net URL URLClassLoader]))
 
 (def base-classloader
@@ -10,7 +11,7 @@
 
 (defn- url-classloader [urls ext]
   (URLClassLoader.
-   (into-array URL (map #(URL. %) (flatten urls)))
+   (into-array URL (map as-url (flatten urls)))
    ext))
 
 (defn wrap-ext-classloader [& urls]
