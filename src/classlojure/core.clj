@@ -28,11 +28,6 @@
         (.substring path 0 (- (count path) 1))
         path))))
 
-(defn classlojure [& urls]
-  (let [^URLClassLoader cl (url-classloader urls ext-classloader)]
-    (.loadClass cl "clojure.lang.RT")
-    cl))
-
 (defmacro with-classloader [cl & body]
   `(binding [*use-context-classloader* true]
      (let [cl# (.getContextClassLoader (Thread/currentThread))]
@@ -65,11 +60,7 @@
       (and (class object)
            (.getClassLoader (class object)))))
 
-(defn eval-in
-  "Eval the given form in a separate classloader. If objects are passed after form, then the form
-   is assumed to be a function and it is applied to the list of objects. This lets you pass objects
-   between classloaders."
-  [cl form & objects]
+(defn eval-in* [cl form & objects]
   (let [print-read-eval (fn [form]
                           (->> (pr-str form)
                                (invoke-in cl clojure.lang.RT/readString [String])
@@ -88,3 +79,18 @@
             (try (read-string string)
                  (catch RuntimeException e
                    string))))))))
+
+(defn eval-in
+  "Eval the given form in a separate classloader. If objects are passed after form, then the form
+   is assumed to be a function and it is applied to the list of objects. This lets you pass objects
+   between classloaders."
+  [cl form & objects]
+  (apply eval-in* cl
+         `(clojure.main/with-bindings (eval '~form))
+         objects))
+
+(defn classlojure [& urls]
+  (let [^URLClassLoader cl (url-classloader urls ext-classloader)]
+    (.loadClass cl "clojure.lang.RT")
+    (eval-in* cl '(require 'clojure.main))
+    cl))
