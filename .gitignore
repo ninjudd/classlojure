@@ -1,7 +1,4 @@
-.cake
+.lein*
 pom.xml
-*.jar
-*.war
-lib
-classes
-build
+target
+test/*.jar
