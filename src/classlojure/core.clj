@@ -1,6 +1,7 @@
 (ns classlojure.core
   (:use [useful.java :only [invoke-private]]
-        [clojure.java.io :only [as-url]])
+        [clojure.java.io :only [as-url]]
+        [clojure.string :only [join]])
   (:import [java.net URL URLClassLoader]))
 
 (def base-classloader
@@ -42,6 +43,16 @@
     (doseq [url urls]
       (when-not (existing? url)
         (invoke-private cl "addURL" (URL. url))))))
+
+(defn alter-java-library-path! [f & args]
+  (let [field (.getDeclaredField ClassLoader "usr_paths")]
+    (try (.setAccessible field true)
+         (let [library-paths (apply f (vec (.get field nil)) args)]
+           (.set field nil (into-array library-paths))
+           (System/setProperty "java.library.path"
+                               (join java.io.File/pathSeparator library-paths)))
+         (finally
+           (.setAccessible field false)))))
 
 (defn invoke-in* [^ClassLoader cl class-name method & [signature & params]]
   (let [class     (.loadClass cl class-name)
