@@ -1,4 +1,4 @@
-(defproject classlojure "0.6.5"
+(defproject classlojure "0.6.6"
   :url "https://github.com/flatland/classlojure"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
