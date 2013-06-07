@@ -1,6 +1,5 @@
 (ns classlojure.core
-  (:use [useful.java :only [invoke-private]]
-        [clojure.java.io :only [as-url]]
+  (:use [clojure.java.io :only [as-url]]
         [clojure.string :only [join]])
   (:import [java.net URL URLClassLoader]))
 
@@ -37,12 +36,6 @@
             ~@body
             (finally
              (.setContextClassLoader (Thread/currentThread) cl#))))))
-
-(defn append-classpath! [^URLClassLoader cl & urls]
-  (let [existing? (set (map #(.getPath ^URL %) (.getURLs cl)))]
-    (doseq [url urls]
-      (when-not (existing? url)
-        (invoke-private cl "addURL" (URL. url))))))
 
 (defn alter-java-library-path! [f & args]
   (let [field (.getDeclaredField ClassLoader "usr_paths")]
