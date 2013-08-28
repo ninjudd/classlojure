@@ -1,7 +1,6 @@
 (ns classlojure.io
   (:use [classlojure.core :only [base-classloader]]
-        [clojure.java.io :only [copy file reader]]
-        [useful.utils :only [read-seq]])
+        [clojure.java.io :only [copy file reader]])
   (:import (java.io File FileInputStream)
            (java.net JarURLConnection)
            (clojure.lang LineNumberingPushbackReader)))
@@ -22,6 +21,15 @@
      (resource-reader base-classloader name))
   ([classloader name]
      (LineNumberingPushbackReader. (reader (resource-stream classloader name)))))
+
+;;; Taken from useful
+(defn read-seq
+  "Read all forms from *in* until an EOF is reached. Throws an exception on incomplete forms."
+  []
+  (lazy-seq
+   (let [form (read *in* false ::EOF)]
+     (when-not (= ::EOF form)
+       (cons form (read-seq))))))
 
 (defn resource-forms
   ([name]
