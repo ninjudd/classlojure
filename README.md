@@ -14,6 +14,24 @@ your primary classloader.
     (eval '*clojure-version*)
     ;; {:major 1, :minor 2, :incremental 0, :qualifier ""}
 
+#### Lisps and lists
+
+A quick note that can save you from despair. The third parameter to `eval-in` is a quoted list and won't be treated any differently from what we are used to in Lisps. Having said that, if you are closing over something and you use unquote like this:
+
+    (let [list-of-strings (map str (range 10))]
+      (classlojure/eval-in cl
+      `(println ~list-of-strings)))
+      
+You shouldn't be surprised by the dreaded `java.lang.String cannot be cast to clojure.lang.IFn`; the first item of the list is indeed a string and not a function as Lisps dictate.
+
+You need something more sophisticated in order for the above to work:
+
+    (let [list-of-strings (map str (range 10))]
+      (classlojure/eval-in cl
+      `(println '~list-of-strings)))
+    
+The order counts here. You first evaluate `list-of-strings` and get a list back which thereafter you quote so that it is not expected to have a function in first position.
+
 ## YourKit
 
 YourKit is kindly supporting open source projects with its full-featured Java Profiler.
