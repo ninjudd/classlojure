@@ -4,7 +4,7 @@ your primary classloader.
 
 ## Usage
 
-    (use 'classlojure)
+    (use 'classlojure.core)
 
     (def clojure-13 (classlojure "file:clojure-1.3.0-alpha2-SNAPSHOT.jar"))
 
